@@ -1155,6 +1155,9 @@ public abstract class PDataType<T> implements DataType<T>, Comparable<PDataType<
 
     public static PDataType fromLiteral(Object value) {
         if (value == null) { return null; }
+        if (value.getClass().getName().equals("java.time.LocalDateTime")) {
+            return PDate.INSTANCE;
+        }
         for (PDataType type : PDataType.values()) {
             if (type.isArrayType()) {
                 if (value instanceof PhoenixArray) {
@@ -1171,7 +1174,9 @@ public abstract class PDataType<T> implements DataType<T>, Comparable<PDataType<
                     } catch (SQLException e) { /* Passthrough to fail */ }
                 }
             } else {
-                if (type.getJavaClass().isInstance(value)) { return type; }
+                if (type.getJavaClass().isInstance(value)) {
+                    return type;
+                }
             }
         }
         throw new UnsupportedOperationException("Unsupported literal value [" + value + "] of type "

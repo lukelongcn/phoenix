@@ -21,6 +21,8 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Types;
 import java.text.Format;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -50,8 +52,22 @@ public class PDate extends PDataType<Date> {
             getCodec().encodeLong(0l, bytes, offset);
             return this.getByteSize();
         }
-        getCodec().encodeLong(((java.util.Date) object).getTime(), bytes, offset);
+        long time;
+        if (isLocalDateTimeType(object)) {
+            time = ((LocalDateTime) object).toInstant(ZoneOffset.of(ZoneOffset.systemDefault().getId())).toEpochMilli();
+        }else{
+            time = ((java.util.Date) object).getTime();
+        }
+        getCodec().encodeLong(time, bytes, offset);
         return this.getByteSize();
+    }
+
+    private boolean isLocalDateTimeType(Object object){
+        if (object.getClass().getName().equals("java.time.LocalDateTime")) {
+            return true;
+        }else{
+            return false;
+        }
     }
 
     @Override
@@ -110,7 +126,11 @@ public class PDate extends PDataType<Date> {
         if (value != null) {
             if (equalsAny(targetType, PUnsignedTimestamp.INSTANCE, PUnsignedDate.INSTANCE,
                     PUnsignedTime.INSTANCE)) {
-                return ((java.util.Date) value).getTime() >= 0;
+                if (isLocalDateTimeType(value)) {
+                    return ((LocalDateTime) value).toInstant(ZoneOffset.of(ZoneOffset.systemDefault().getId())).toEpochMilli() >= 0;
+                }else{
+                    return ((java.util.Date) value).getTime() >= 0;
+                }
             }
         }
         return super.isCoercibleTo(targetType, value);
@@ -140,7 +160,11 @@ public class PDate extends PDataType<Date> {
         if (rhsType == PTimestamp.INSTANCE || rhsType == PUnsignedTimestamp.INSTANCE) {
             return -rhsType.compareTo(rhs, lhs, PTime.INSTANCE);
         }
-        return ((java.util.Date) lhs).compareTo((java.util.Date) rhs);
+        if (isLocalDateTimeType(lhs)) {
+            return ((LocalDateTime) lhs).compareTo((LocalDateTime) rhs);
+        }else{
+            return ((java.util.Date) lhs).compareTo((java.util.Date) rhs);
+        }
     }
 
     @Override
