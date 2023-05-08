@@ -7,6 +7,7 @@
     <version>5.0.0-HBase-2.0</version>
   </parent>
   <artifactId>phoenix-core</artifactId>
+  <version>5.0.0-HBase-2.0-techLab</version>
   <name>Phoenix Core</name>
   <description>Core Phoenix codebase</description>
 
@@ -476,4 +477,18 @@
         <artifactId>disruptor</artifactId>
       </dependency>
   </dependencies>
+
+  <distributionManagement>
+    <repository>
+      <id>techLab</id>
+      <name>maven-releases</name>
+      <url>http://10.95.35.45:8081/repository/maven-releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>techLab</id>
+      <name>maven-snapshots</name>
+      <url>http://10.95.35.45:8081/repository/maven-snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+
 </project>
